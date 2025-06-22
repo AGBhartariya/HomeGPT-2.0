@@ -742,7 +742,10 @@ def create_main_app():
         "🌤️ MoodSpace",
         "💌 Message"
     ])
-    
+        
+    import datetime
+    from datetime import datetime
+
     from pathlib import Path
     DB_PATH = Path("memories.db")
 
@@ -760,7 +763,7 @@ def create_main_app():
         conn.commit()
         conn.close()
 
-    
+
 
 
     def save_memory(title, content, username):
@@ -771,6 +774,8 @@ def create_main_app():
                 (username, title, content, timestamp))
         conn.commit()
         conn.close()
+
+   
 
 
 
