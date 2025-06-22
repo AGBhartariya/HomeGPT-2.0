@@ -8,8 +8,8 @@ import streamlit as st
 # api_key = os.getenv("GEMINI_API_KEY")
 
 def ask_homegpt(prompt):
-    api_key = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=api_key)
+    GEMINI_API_KEY = st.secrets["apis"]["gemini_key"]
+    genai.configure(api_key=GEMINI_API_KEY)
     try:
         
         model = genai.GenerativeModel("gemini-2.0-flash")
