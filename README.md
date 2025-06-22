@@ -89,30 +89,12 @@ chat_id = "YOUR_TELEGRAM_CHAT_ID"
 Use “Reboot App” from Streamlit Cloud to clear cache and apply changes.
 
 ---
-
-## 📸 Screenshots
-
-<details>
-  <summary><b>🧘 Mood Detection with Therapy</b></summary>
-  <img src="assets/moodspace.png" width="100%">
-</details>
-
-<details>
-  <summary><b>🎵 YouTube Music Playback</b></summary>
-  <img src="assets/music.png" width="100%">
-</details>
-
-<details>
-  <summary><b>💌 Telegram Messaging Interface</b></summary>
-  <img src="assets/telegram_tab.png" width="100%">
-</details>
-
 ---
 
 ## 👨‍💻 Developer
 
 **Abhigyan Gopal Bhartariya**  
-[LinkedIn](#) • [Telegram](#)
+[LinkedIn](#https://www.linkedin.com/in/abhigyan-bhartariya-73267928a/)
 
 ---
 
