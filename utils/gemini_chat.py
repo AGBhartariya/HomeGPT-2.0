@@ -5,11 +5,11 @@ import json, re
 from datetime import datetime
 
 # Load API keys from Streamlit secrets
-gemini_api = st.secrets["GEMINI_API_KEY"]
-youtube_api = st.secrets["YOUTUBE_API_KEY"]
-watchmode_api= st.secrets["WATCHMODE_API_KEY"]
+GEMINI_API_KEY = st.secrets["apis"]["gemini_key"]
+YOUTUBE_API_KEY = st.secrets["apis"]["youtube_key"]
+WATCHMODE_API_KEY= st.secrets["apis"]["watchmode_key"]
 
-genai.configure(api_key=gemini_api)
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Define known moods
 KNOWN_MOODS = [
@@ -61,7 +61,7 @@ def get_youtube_music_video(music):
     params = {
         "part": "snippet",
         "q": music + " song",
-        "key": youtube_api,
+        "key": YOUTUBE_API_KEY,
         "type": "video",
         "maxResults": 1
     }
@@ -79,7 +79,7 @@ def get_movie_streaming_info(movie):
     try:
         search_url = "https://api.watchmode.com/v1/search/"
         search_params = {
-            "apiKey": watchmode_api,
+            "apiKey": WATCHMODE_API_KEY,
             "search_value": movie,
             "search_field": "name",
             "search_type": 1
@@ -93,7 +93,7 @@ def get_movie_streaming_info(movie):
         movie_id = search_response["title_results"][0]["id"]
 
         sources_url = f"https://api.watchmode.com/v1/title/{movie_id}/sources/"
-        sources = requests.get(sources_url, params={"apiKey": watchmode_api}).json()
+        sources = requests.get(sources_url, params={"apiKey": WATCHMODE_API_KEY}).json()
 
         platforms = []
         seen = set()
