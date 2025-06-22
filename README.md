@@ -94,7 +94,7 @@ Use “Reboot App” from Streamlit Cloud to clear cache and apply changes.
 ## 👨‍💻 Developer
 
 **Abhigyan Gopal Bhartariya**  
-[LinkedIn](#https://www.linkedin.com/in/abhigyan-bhartariya-73267928a/)
+[LinkedIn](https://www.linkedin.com/in/abhigyan-bhartariya-73267928a/)
 
 ---
 
