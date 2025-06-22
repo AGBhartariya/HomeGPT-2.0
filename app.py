@@ -1008,8 +1008,8 @@ def create_main_app():
             )
             st.table(leaderboard_df.sort_values("Score", ascending=False).reset_index(drop=True))
 
-        word_scramble_game()
-        math_challenge_game()
+        # word_scramble_game()
+        # math_challenge_game()
 
 
     
