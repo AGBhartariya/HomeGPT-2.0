@@ -8,4 +8,3 @@ pytz
 sqlite3  # Only for documentation; it's built into Python
 torch
 youtube-search-python
-tmdb-python
