@@ -849,14 +849,14 @@ def create_main_app():
         if st.button("Ask"):
             response = ask_homegpt(user_query)
             st.success(response)
-    
+
     with music_tab:
         st.header("🎵 YouTube Music Player")
         song_query = st.text_input("Enter song name or artist:", key="music_search")
-        api_key = st.secrets["YOUTUBE_API_KEY"]
+        YOUTUBE_API_KEY= st.secrets["apis"]["youtube_key"]
 
         if st.button("Search & Play", key="music_play_btn") and song_query:
-            video_id, title = search_youtube(song_query, api_key)
+            video_id, title = search_youtube(song_query,YOUTUBE_API_KEY)
             if video_id:
                 st.success(f"Playing: {title}")
                 st.video(f"https://www.youtube.com/watch?v={video_id}")
