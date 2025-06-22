@@ -1,77 +1,111 @@
-# from tmdb import route, schema
-import os
+import google.generativeai as genai
+import requests
+import streamlit as st
+import json, re
 
-# # Initialize TMDB
-# tmdb = route.Base()
-# tmdb.key = os.getenv("TMDB_API_KEY")
+# Load API keys from Streamlit secrets
+GEMINI_API_KEY = st.secrets["apis"]["gemini_key"]
+YOUTUBE_API_KEY = st.secrets["apis"]["youtube_key"]
+WATCHMODE_API_KEY = st.secrets["apis"]["watchmode_key"]
 
+genai.configure(api_key=GEMINI_API_KEY)
 
-YOUTUBE_API_KEY="AIzaSyDccAQACPXk5uMb-ctKRJbxwwTEIEhpJOc"
+KNOWN_MOODS = [
+    "Happy", "Sad", "Anxious", "Angry", "Confused", "Grateful", "Lonely",
+    "Excited", "Burned Out", "Motivated", "Tired", "Overwhelmed", "Calm",
+    "Frustrated", "Hopeful", "Depressed", "Joyful", "Peaceful", "Heartbroken"
+]
 
-def search_youtube_music(mood):
-    api_key = YOUTUBE_API_KEY
-    search_url = "https://www.googleapis.com/youtube/v3/search"
+def detect_mood_and_recommend(user_input):
+    prompt = f"""
+The user says: "{user_input}"
 
+Your tasks:
+1. From the following list of moods, pick the ONE best matching the user's emotional state:
+{', '.join(KNOWN_MOODS)}
+
+2. Recommend one music artist or playlist for this mood, preferably Bollywood.
+
+3. Suggest one movie title appropriate for this emotional state.
+
+4. Write a warm, empathetic, comforting paragraph-type therapy-style message including how to proceed further.
+
+Return your answer in **exact** JSON format as:
+
+{{
+  "mood": "...",
+  "music": "...",
+  "movie": "...",
+  "therapy": "..."
+}}
+"""
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    response = model.generate_content(prompt)
+
+    try:
+        json_like = re.search(r'\{.*\}', response.text, re.DOTALL).group()
+        return json.loads(json_like)
+    except Exception as e:
+        print("Gemini Parsing Error:", e)
+        return {
+            "mood": "Confused",
+            "music": "Try listening to calming piano music or lo-fi beats.",
+            "movie": "Inside Out – a thoughtful movie about emotions.",
+            "therapy": "It's okay to feel confused. You're not alone in this. Take a small step forward—clarity follows action."
+        }
+
+def get_youtube_music_video(music):
+    url = "https://www.googleapis.com/youtube/v3/search"
     params = {
         "part": "snippet",
-        "q": f"{mood} mood music",
-        "key": api_key,
+        "q": music + " song",
+        "key": YOUTUBE_API_KEY,
         "type": "video",
         "maxResults": 1
     }
+    res = requests.get(url, params=params).json()
+    if res.get("items"):
+        video = res['items'][0]
+        return (
+            video['snippet']['title'],
+            f"https://www.youtube.com/watch?v={video['id']['videoId']}",
+            video['snippet']['thumbnails']['high']['url']
+        )
+    return None, None, None
 
+def get_movie_streaming_info(movie):
     try:
-        response = requests.get(search_url, params=params)
-        response.raise_for_status()
-        results = response.json()
+        search_url = "https://api.watchmode.com/v1/search/"
+        params = {
+            "apiKey": WATCHMODE_API_KEY,
+            "search_value": movie,
+            "search_field": "name",
+            "search_type": 1
+        }
+        search_response = requests.get(search_url, params=params).json()
 
-        if "items" in results and results["items"]:
-            video_id = results["items"][0]["id"]["videoId"]
-            title = results["items"][0]["snippet"]["title"]
-            thumbnail = results["items"][0]["snippet"]["thumbnails"]["high"]["url"]
-            return {
-                "url": f"https://www.youtube.com/watch?v={video_id}",
-                "title": title,
-                "thumbnail": thumbnail
-            }
+        if not search_response.get("title_results"):
+            return None
+
+        movie_id = search_response["title_results"][0]["id"]
+        sources_url = f"https://api.watchmode.com/v1/title/{movie_id}/sources/"
+        source_params = {"apiKey": WATCHMODE_API_KEY}
+        sources = requests.get(sources_url, params=source_params).json()
+
+        platforms = []
+        seen = set()
+
+        for src in sources:
+            name = src["name"]
+            url = src.get("web_url", "")
+            access_type = src["type"]
+            key = (name, url, access_type)
+            if key not in seen:
+                seen.add(key)
+                platforms.append((f"{name} ({access_type})", url))
+
+        return platforms
 
     except Exception as e:
-        print("YouTube API error:", e)
-
-    return None
-
-import requests
-import streamlit as st
-
-WATCHMODE_API_KEY = "ZOIyNaBP6s3lh5Hadfdp4UEiDjTv9A4CwN9x7pJs"
-
-def search_movie_watchmode(title):
-    # Step 1: Search for movie ID
-    search_url = "https://api.watchmode.com/v1/search/"
-    params = {
-        "apiKey": WATCHMODE_API_KEY,
-        "search_field": "title",
-        "search_value": title,
-        "types": "movie"
-    }
-    res = requests.get(search_url, params=params).json()
-    if not res["title_results"]:
+        print("Error getting streaming info:", e)
         return None
-    
-    movie = res["title_results"][0]
-    movie_id = movie["id"]
-
-    # Step 2: Get streaming availability
-    details_url = f"https://api.watchmode.com/v1/title/{movie_id}/details/"
-    sources_url = f"https://api.watchmode.com/v1/title/{movie_id}/sources/"
-
-    details = requests.get(details_url, params={"apiKey": WATCHMODE_API_KEY}).json()
-    sources = requests.get(sources_url, params={"apiKey": WATCHMODE_API_KEY}).json()
-
-    return {
-        "title": movie["name"],
-        "year": movie.get("year"),
-        "poster": details.get("poster"),
-        "overview": details.get("plot_overview"),
-        "sources": sources
-    }
