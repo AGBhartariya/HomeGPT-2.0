@@ -1084,7 +1084,7 @@ def create_main_app():
         if "sender_name" not in st.session_state:
             st.session_state.sender_name = ""
 
-        name = st.text_input("Your Name (same as that of username please)", value=st.session_state.sender_name, key="sender_input")
+        name = st.text_input("Your Username", value=st.session_state.sender_name, key="sender_input")
         if name.strip():
             st.session_state.sender_name = name.strip()
 
