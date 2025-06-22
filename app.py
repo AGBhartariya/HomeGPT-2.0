@@ -1069,8 +1069,8 @@ def create_main_app():
     from utils.send_love import fetch_replies  # Ensure this returns a list of updates
 
     # Load from Streamlit secrets
-    TELEGRAM_BOT_TOKEN = st.secrets["telegram"]["bot_token"]
-    TELEGRAM_CHAT_ID = st.secrets["telegram"]["chat_id"]
+    TELEGRAM_BOT_TOKEN = st.secrets["bot"]["bot_token"]
+    TELEGRAM_CHAT_ID = st.secrets["bot"]["chat_id"]
 
     with love_tab:
         st.header("💌 Send a Message to Abhigyan via Telegram")
