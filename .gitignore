@@ -1,0 +1,8 @@
+.env
+secret.key
+memories.json
+passwords.db
+passwords.json
+__pycache__/
+*.pyc
+secrets.toml
