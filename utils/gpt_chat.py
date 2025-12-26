@@ -1,21 +1,30 @@
-import os
-from dotenv import load_dotenv
-import google.generativeai as genai
 import streamlit as st
+import google.generativeai as genai
+from google.api_core.exceptions import ResourceExhausted
 
-# Load environment variables from .env file
-# load_dotenv()
-# api_key = os.getenv("GEMINI_API_KEY")
+def ask_homegpt(prompt: str):
+    if not prompt or not prompt.strip():
+        return "Please ask something 🙂"
 
-def ask_homegpt(prompt):
-    GEMINI_API_KEY = st.secrets["apis"]["gemini_key"]
-    genai.configure(api_key=GEMINI_API_KEY)
     try:
-        
+        # Configure API fresh every call (NO caching)
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
         model = genai.GenerativeModel("gemini-2.0-flash")
+
         response = model.generate_content(
-            f"You are a very warm, friendly family assistant named HomeGPT who provides solutions to every question in a very respectful manner and cares for people. Make it in the best way possible.\n\nUser: {prompt}"
+            "You are a very warm, friendly family assistant named HomeGPT. "
+            "You provide respectful, caring, and helpful answers.\n\n"
+            f"User: {prompt}",
+            request_options={"timeout": 15}  # ⛔ stop retry storms
         )
+
         return response.text
+
+    except ResourceExhausted:
+        # 🚫 HARD STOP — prevents retry loops
+        return "⚠️ HomeGPT is temporarily unavailable (API quota reached). Please try again later."
+
     except Exception as e:
-        return f"Error: {e}"
+        return f"❌ Unexpected error: {e}"
+
